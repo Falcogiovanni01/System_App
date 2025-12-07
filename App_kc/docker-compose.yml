@@ -69,7 +69,7 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
-      KC_HOSTNAME_URL: http://localhost/
+      KC_HOSTNAME_URL: http://localhost/:8443/
       KC_PROXY: edge
     volumes:
       - ./dati_keycloak:/opt/keycloak/data/
