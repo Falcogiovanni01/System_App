@@ -12,8 +12,6 @@ public class EnvironmentDebug {
     @Autowired
     private Environment env;
 
-   
-
     @PostConstruct
     public void printEnvVars() {
 
@@ -23,7 +21,7 @@ public class EnvironmentDebug {
                 "VAULT_TOKEN",
                 "MONGO_ROOT_PASSWORD",
                 "KEYCLOACK_PASSWORD",
-                "KEYCLOACK_CLIENT_SECRET" 
+                "KEYCLOACK_CLIENT_SECRET"
         };
 
         for (String key : keys) {
@@ -34,10 +32,10 @@ public class EnvironmentDebug {
             } else {
                 System.out.println(key + " = LENGTH(" + value.length() + ")");
             }
-            
+
         }
 
-        System.out.println(System.getenv());
+        // System.out.println(System.getenv());
 
         System.out.println("=========== ENV DEBUG END =============");
     }

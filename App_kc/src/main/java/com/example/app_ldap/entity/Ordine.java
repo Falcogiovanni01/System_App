@@ -1,40 +1,78 @@
 package com.example.app_ldap.entity;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Document(collection = "ordini") // Collezione Ordini su MongoDB
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "ordini")
 public class Ordine {
 
     @Id
     private String id;
-
-    // Chi ha effettuato l'ordine (legato all'utente LDAP)
-    private String username; 
-
-    // Lista degli ID dei piatti ordinati
-    private List<String> piattiId; 
-    
-    // Timestamp dell'ordine
+    private String username;
+    private List<String> piattiId;
     private LocalDateTime dataOrdine;
-    
-    // Stato per la cucina
-    private String stato; // "Inviato", "In preparazione", "Pronto"
+    private String stato;
 
-    // Costruttore per la creazione dell'ordine
+    public Ordine() {
+    }
+
     public Ordine(String username, List<String> piattiId) {
         this.username = username;
         this.piattiId = piattiId;
         this.dataOrdine = LocalDateTime.now();
         this.stato = "Inviato";
     }
-} 
+
+    // Costruttore completo
+    public Ordine(String id, String username, List<String> piattiId, LocalDateTime dataOrdine, String stato) {
+        this.id = id;
+        this.username = username;
+        this.piattiId = piattiId;
+        this.dataOrdine = dataOrdine;
+        this.stato = stato;
+    }
+
+    // GETTERS & SETTERS (Quelli che mancavano)
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public List<String> getPiattiId() {
+        return piattiId;
+    }
+
+    public void setPiattiId(List<String> piattiId) {
+        this.piattiId = piattiId;
+    }
+
+    public LocalDateTime getDataOrdine() {
+        return dataOrdine;
+    }
+
+    public void setDataOrdine(LocalDateTime dataOrdine) {
+        this.dataOrdine = dataOrdine;
+    }
+
+    public String getStato() {
+        return stato;
+    }
+
+    public void setStato(String stato) {
+        this.stato = stato;
+    }
+}
