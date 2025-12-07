@@ -29,12 +29,41 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
-.vscode/
-
-.env
 
 vault-cluster-vault-2025-12-05T14_26_30.971Z.json
 
 keycloack.txt
 vault-*.json
+
+
+###################
+# --- SECRETS & ENV ---
+.env
+**/*.env
+
+# --- DOCKER VOLUMES (I dati persistenti) ---
+# Ignora i dati di Vault (quelli dello screenshot)
+vault/data/
+vault/logs/
+
+# Ignora i dati di Keycloak (visto nello screenshot)
+dati_keycloak/
+
+# Ignora i dati di MongoDB (se hai mappato il volume in locale)
+mongo_data/
+
+# --- JAVA & MAVEN ---
+target/
+*.jar
+*.war
+.mvn/
+mvnw
+mvnw.cmd
+
+# --- IDE SETTINGS (Opzionale ma consigliato) ---
+.idea/
+.vscode/
+*.iml
+
+# --- LOGS ---
+*.log
