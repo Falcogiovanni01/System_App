@@ -1,20 +1,37 @@
 version: '3.8'
 
 services:
-  # --- 1. NGINX (Reverse Proxy) ---
-  nginx:
+  # --- 1. NGINX (App + Keycloak) (Reverse Proxy) ---
+  nginx-user:
     image: nginx:latest
-    container_name: mensa-proxy
+    container_name: mensa-proxy-user
     ports:
+      - "8443:8443"  # HTTPS 
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./mensa.crt:/etc/nginx/certs/server.crt:ro
+      - ./mensa.key:/etc/nginx/certs/server.key:ro
     depends_on:
       - keycloak
       - app_kc
       - vault
       - mongo-express
       - mongodb
+# ----------------------------------------------------------------
+  #   1.2 NGINX-VAULT  - Porta 9443
+  # ----------------------------------------------------------------
+  nginx-vault:
+    image: nginx:latest
+    container_name: mensa-proxy-vault
+    ports:
+      - "9443:9443"  # HTTPS 
+    volumes:
+      - ./nginx/nginx-vault.conf:/etc/nginx/nginx.conf:ro
+      - ./mensa.crt:/etc/nginx/certs/server.crt:ro
+      - ./mensa.key:/etc/nginx/certs/server.key:ro
+    depends_on:
+      - vault
 
 
   # --- 2. TUA APP SPRING BOOT ---
