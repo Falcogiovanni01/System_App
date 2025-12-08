@@ -3,11 +3,11 @@ version: '3.8'
 services:
   # --- 1. NGINX (App + Keycloak) (Reverse Proxy) ---
   nginx-user:
-    image: nginx:latest
+    image: nginxinc/nginx-unprivileged:alpine #Esegue i processi come utente non-root
     container_name: mensa-proxy-user
     ports:
       - "8443:8443"  # HTTPS 
-      - "80:80"
+      - "80:8080" # la modalità nginx-unprivileged usa 8080 invece di 80)
     volumes:
       - ./nginx/nginx-user.conf:/etc/nginx/nginx.conf:ro
       - ./mensa.crt:/etc/nginx/certs/server.crt:ro
