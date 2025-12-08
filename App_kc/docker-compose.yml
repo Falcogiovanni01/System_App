@@ -22,7 +22,7 @@ services:
   #   1.2 NGINX-VAULT  - Porta 9443
   # ----------------------------------------------------------------
   nginx-vault:
-    image: nginx:latest
+    image: nginxinc/nginx-unprivileged:alpine
     container_name: mensa-proxy-vault
     ports:
       - "9443:9443"  # HTTPS 
