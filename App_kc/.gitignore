@@ -67,3 +67,9 @@ mvnw.cmd
 
 # --- LOGS ---
 *.log
+
+# certs/
+certs/*
+mensa.crt
+mensa.key
+
