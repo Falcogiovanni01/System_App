@@ -13,6 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestCustomizers;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -21,7 +24,15 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
         @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        public SecurityFilterChain securityFilterChain(HttpSecurity http, ClientRegistrationRepository clientRepo)
+                        throws Exception {
+                // AGGIUNTO PER SHA256
+                DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
+                                clientRepo, "/oauth2/authorization");
+
+                // attiva S256 (code_challenge)
+                resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
+
                 http
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/error")
@@ -32,6 +43,8 @@ public class SecurityConfig {
                                                 .anyRequest().authenticated())
                                 .csrf(csrf -> csrf.disable())
                                 .oauth2Login(oauth2 -> oauth2
+                                                .authorizationEndpoint(authEndpoint -> authEndpoint
+                                                                .authorizationRequestResolver(resolver))
                                                 .defaultSuccessUrl("/dashboard", true)
                                                 // INIZIO LOGICA MAPPING INLINE
                                                 .userInfoEndpoint(userInfo -> userInfo
@@ -85,12 +98,12 @@ public class SecurityConfig {
                                 // FINE LOGICA MAPPING INLINE
                                 )
                                 .logout(logout -> logout
-                                .logoutUrl("/logout") // L'URL che innesca il logout (dal tasto nella dashboard)
-                                .logoutSuccessUrl("/logout-success") // DOVE ANDARE DOPO (Pagina custom)
-                                .invalidateHttpSession(true) // Cancella la sessione
-                                .clearAuthentication(true) // Pulisce i dati auth
-                                .permitAll()
-                        );
+                                                .logoutUrl("/logout") // L'URL che innesca il logout (dal tasto nella
+                                                                      // dashboard)
+                                                .logoutSuccessUrl("/logout-success") // DOVE ANDARE DOPO (Pagina custom)
+                                                .invalidateHttpSession(true) // Cancella la sessione
+                                                .clearAuthentication(true) // Pulisce i dati auth
+                                                .permitAll());
 
                 return http.build();
         }
@@ -133,4 +146,5 @@ public class SecurityConfig {
                         return mappedAuthorities;
                 };
         }
+
 }
