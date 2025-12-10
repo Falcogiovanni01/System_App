@@ -93,7 +93,8 @@ services:
       # AGGIUNTO: Inietta lo script di creazione utente
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
-      - "27017:27017"
+      # Gli altri container (App, Express) continuano a vederlo tramite la rete interna.
+      - "127.0.0.1:27017:27017"
     # --- AGGIUNGI QUESTA RIGA PER L'AUDIT (AU-12) ---
     # Aumenta la verbosità dei log solo per il Controllo Accessi (Login/Auth)
     # . Comando aggiornato: Configura verbosità E percorso file log
