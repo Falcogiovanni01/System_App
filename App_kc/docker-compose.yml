@@ -41,7 +41,7 @@ services:
     environment:
        # AGGIUNTO: &maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
       # Questo limita il numero massimo di connessioni a 50 per evitare di saturare il DB
-      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}!@mongodb:27017/mensa_db?authSource=mensa_db&maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/mensa_db?authSource=mensa_db&maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
       SERVER_PORT: 8090
       # (Opzionale) Se vuoi che l'app legga i segreti da Vault all'avvio, 
       # dovresti aggiungere qui le variabili per connettersi a Vault, 
