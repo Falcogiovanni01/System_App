@@ -39,7 +39,10 @@ services:
     build: .
     container_name: app_kc
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://root:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/mensa_db?authSource=admin
+       # AGGIUNTO: &maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
+      # Questo limita il numero massimo di connessioni a 50 per evitare di saturare il DB
+      SPRING_DATA_MONGODB_URI: mongodb://root:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/mensa_db?authSource=admin&maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
+  
       SERVER_PORT: 8090
       # (Opzionale) Se vuoi che l'app legga i segreti da Vault all'avvio, 
       # dovresti aggiungere qui le variabili per connettersi a Vault, 
@@ -83,6 +86,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+     
     volumes:
       - mongo_data:/data/db
     ports:
