@@ -41,8 +41,7 @@ services:
     environment:
        # AGGIUNTO: &maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
       # Questo limita il numero massimo di connessioni a 50 per evitare di saturare il DB
-      SPRING_DATA_MONGODB_URI: mongodb://root:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/mensa_db?authSource=admin&maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
-  
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}!@mongodb:27017/mensa_db?authSource=mensa_db&maxPoolSize=50&minPoolSize=5&maxIdleTimeMS=30000
       SERVER_PORT: 8090
       # (Opzionale) Se vuoi che l'app legga i segreti da Vault all'avvio, 
       # dovresti aggiungere qui le variabili per connettersi a Vault, 
@@ -91,6 +90,8 @@ services:
       - mongo_data:/data/db
       # Monta la cartella locale per i log
       - ./mongo_logs:/var/log/mongodb
+      # AGGIUNTO: Inietta lo script di creazione utente
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     ports:
       - "27017:27017"
     # --- AGGIUNGI QUESTA RIGA PER L'AUDIT (AU-12) ---
