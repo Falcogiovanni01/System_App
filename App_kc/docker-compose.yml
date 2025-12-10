@@ -89,8 +89,19 @@ services:
      
     volumes:
       - mongo_data:/data/db
+      # Monta la cartella locale per i log
+      - ./mongo_logs:/var/log/mongodb
     ports:
       - "27017:27017"
+    # --- AGGIUNGI QUESTA RIGA PER L'AUDIT (AU-12) ---
+    # Aumenta la verbosità dei log solo per il Controllo Accessi (Login/Auth)
+    # . Comando aggiornato: Configura verbosità E percorso file log
+    command: [
+      "mongod",
+      "--setParameter", "logComponentVerbosity={accessControl: {verbosity: 1}}",
+      "--logpath", "/var/log/mongodb/mongod.log",
+      "--bind_ip_all"
+    ]
 
   # --- 5. MONGO EXPRESS ---
   mongo-express:
