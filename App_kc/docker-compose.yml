@@ -5,6 +5,15 @@ services:
   nginx-user:
     image: nginxinc/nginx-unprivileged:alpine #Esegue i processi come utente non-root
     container_name: mensa-proxy-user
+      # --- RUNTIME SECURITY HARDENING ---
+    # 1. Impedisce che un processo guadagni nuovi privilegi (es. sudo)
+    security_opt:
+      - no-new-privileges:true
+    
+    # 2. Rimuove TUTTE le capacità Linux (Capabilities) non necessarie
+    # Il container non potrà cambiare permessi file, gestire la rete, ecc.
+    cap_drop:
+      - ALL
     ports:
       - "8443:8443"  # HTTPS 
       - "80:8080" # la modalità nginx-unprivileged usa 8080 invece di 80)
@@ -24,6 +33,15 @@ services:
   nginx-vault:
     image: nginxinc/nginx-unprivileged:alpine
     container_name: mensa-proxy-vault
+      # --- RUNTIME SECURITY HARDENING ---
+    # 1. Impedisce che un processo guadagni nuovi privilegi (es. sudo)
+    security_opt:
+      - no-new-privileges:true
+    
+    # 2. Rimuove TUTTE le capacità Linux (Capabilities) non necessarie
+    # Il container non potrà cambiare permessi file, gestire la rete, ecc.
+    cap_drop:
+      - ALL
     ports:
       - "9443:9443"  # HTTPS 
     volumes:
@@ -55,6 +73,16 @@ services:
       MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       KEYCLOACK_PASSWORD: ${KEYCLOACK_PASSWORD}             
       KEYCLOACK_CLIENT_SECRET: ${KEYCLOACK_CLIENT_SECRET}
+    # --- RUNTIME SECURITY HARDENING ---
+    # 1. Impedisce che un processo guadagni nuovi privilegi (es. sudo)
+    security_opt:
+      - no-new-privileges:true
+    
+    # 2. Rimuove TUTTE le capacità Linux (Capabilities) non necessarie
+    # Il container non potrà cambiare permessi file, gestire la rete, ecc.
+    cap_drop:
+      - ALL
+    
     depends_on:
       - mongodb
       - keycloak
