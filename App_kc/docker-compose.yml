@@ -74,6 +74,10 @@ services:
       KEYCLOACK_PASSWORD: ${KEYCLOACK_PASSWORD}             
       KEYCLOACK_CLIENT_SECRET: ${KEYCLOACK_CLIENT_SECRET}
     # --- RUNTIME SECURITY HARDENING ---
+    # --- HARDENING FINALE ---
+    read_only: true  # <--- Questo è il Read-Only Filesystem ( PER RUNTIMR CONFIGURATION)
+    tmpfs:
+      - /tmp         # <---scrivi in una cartella in RAM, temporanea, se scrivi file sul disco si blocca. 
     # 1. Impedisce che un processo guadagni nuovi privilegi (es. sudo)
     security_opt:
       - no-new-privileges:true
