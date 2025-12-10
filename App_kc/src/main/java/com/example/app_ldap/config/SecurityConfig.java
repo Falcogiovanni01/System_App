@@ -19,6 +19,9 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequest
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 
+
+import org.springframework.security.config.http.SessionCreationPolicy;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -33,70 +36,86 @@ public class SecurityConfig {
                 // attiva S256 (code_challenge)
                 resolver.setAuthorizationRequestCustomizer(OAuth2AuthorizationRequestCustomizers.withPkce());
 
-                http
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/error")
-                                                .permitAll()
-                                                .requestMatchers("/", "/home").permitAll()
-                                                .requestMatchers("/gestione").hasRole("ADMIN")
-                                                .requestMatchers("/dashboard", "/ordini").hasAnyRole("USER", "ADMIN")
-                                                .anyRequest().authenticated())
-                                .csrf(csrf -> csrf.disable())
-                                .oauth2Login(oauth2 -> oauth2
-                                                .authorizationEndpoint(authEndpoint -> authEndpoint
-                                                                .authorizationRequestResolver(resolver))
-                                                .defaultSuccessUrl("/dashboard", true)
-                                                // INIZIO LOGICA MAPPING INLINE
-                                                .userInfoEndpoint(userInfo -> userInfo
-                                                                .userAuthoritiesMapper(authorities -> {
-                                                                        Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+                 http
+                        .authorizeHttpRequests(auth -> auth
+                                        .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/error")
+                                        .permitAll()
+                                        .requestMatchers("/", "/home").permitAll()
+                                        .requestMatchers("/gestione").hasRole("ADMIN")
+                                        .requestMatchers("/dashboard", "/ordini").hasAnyRole("USER", "ADMIN")
+                                        .anyRequest().authenticated())
+                        .csrf(csrf -> csrf.disable())
 
+                         // =================================================================
+                        // --- INIZIO NUOVO CODICE (VULNERABILITÀ SESSION FIXATION) ---
+                        // =================================================================
+                        .sessionManagement(session -> session
+                        // NIST SC-23: Protezione Session Fixation (migra la sessione al login)
+                        .sessionFixation(fixation -> fixation.migrateSession())
+                        
+                        // NIST AC-10: Crea la sessione solo se necessario
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        )
+                        // =================================================================
+                        // --- FINE NUOVO CODICE ---
+                        // =================================================================
+
+
+
+                        .oauth2Login(oauth2 -> oauth2
+                                        .authorizationEndpoint(authEndpoint -> authEndpoint
+                                                        .authorizationRequestResolver(resolver))
+                                        .defaultSuccessUrl("/dashboard", true)
+                                        // INIZIO LOGICA MAPPING INLINE
+        .userInfoEndpoint(userInfo -> userInfo
+                        .userAuthoritiesMapper(authorities -> {
+                                Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+
+                                System.out.println(
+                                                "============== DEBUG LOGIN (INLINE) ==============");
+
+                                authorities.forEach(authority -> {
+                                        if (authority instanceof OidcUserAuthority oidcUserAuthority) {
+                                                Map<String, Object> userInfoMap = oidcUserAuthority
+                                                                .getAttributes();
+                                                // Dump per vedere cosa arriva
+                                                // da Keycloak
+                                                System.out.println(
+                                                                "User Info Attributes: "
+                                                                                + userInfoMap);
+
+                                                Map<String, Object> realmAccess = (Map<String, Object>) userInfoMap
+                                                                .get("realm_access");
+                                                if (realmAccess != null) {
+                                                        Collection<String> roles = (Collection<String>) realmAccess
+                                                                        .get("roles");
+                                                        if (roles != null) {
+                                                                mappedAuthorities
+                                                                .addAll(roles.stream()
+                                                                .map(roleName -> {
+                                                                        String r = "ROLE_"+ roleName.toUpperCase();
                                                                         System.out.println(
-                                                                                        "============== DEBUG LOGIN (INLINE) ==============");
+                                                                                        "Mappato: " + r); // Debug
+                                                                                                                // singolo
+                                                                                                                // ruolo
+                                                                        return new SimpleGrantedAuthority(
+                                                                                        r);
+                                                                })
+                                                                .collect(Collectors
+                                                                                .toList()));
+                                                        }
+                                                }
+                                        }
+                                });
 
-                                                                        authorities.forEach(authority -> {
-                                                                                if (authority instanceof OidcUserAuthority oidcUserAuthority) {
-                                                                                        Map<String, Object> userInfoMap = oidcUserAuthority
-                                                                                                        .getAttributes();
-                                                                                        // Dump per vedere cosa arriva
-                                                                                        // da Keycloak
-                                                                                        System.out.println(
-                                                                                                        "User Info Attributes: "
-                                                                                                                        + userInfoMap);
-
-                                                                                        Map<String, Object> realmAccess = (Map<String, Object>) userInfoMap
-                                                                                                        .get("realm_access");
-                                                                                        if (realmAccess != null) {
-                                                                                                Collection<String> roles = (Collection<String>) realmAccess
-                                                                                                                .get("roles");
-                                                                                                if (roles != null) {
-                                                                                                        mappedAuthorities
-                                                                                                                        .addAll(roles.stream()
-                                                                                                                                        .map(roleName -> {
-                                                                                                                                                String r = "ROLE_"
-                                                                                                                                                                + roleName.toUpperCase();
-                                                                                                                                                System.out.println(
-                                                                                                                                                                "Mappato: " + r); // Debug
-                                                                                                                                                                                  // singolo
-                                                                                                                                                                                  // ruolo
-                                                                                                                                                return new SimpleGrantedAuthority(
-                                                                                                                                                                r);
-                                                                                                                                        })
-                                                                                                                                        .collect(Collectors
-                                                                                                                                                        .toList()));
-                                                                                                }
-                                                                                        }
-                                                                                }
-                                                                        });
-
-                                                                        System.out.println("Ruoli finali assegnati: "
-                                                                                        + mappedAuthorities);
-                                                                        System.out.println(
-                                                                                        "==================================================");
-                                                                        return mappedAuthorities;
-                                                                }))
-                                // FINE LOGICA MAPPING INLINE
-                                )
+                                System.out.println("Ruoli finali assegnati: "
+                                                + mappedAuthorities);
+                                System.out.println(
+                                                "==================================================");
+                                return mappedAuthorities;
+                        }))
+                        // FINE LOGICA MAPPING INLINE
+                        )
                                 .logout(logout -> logout
                                                 .logoutUrl("/logout") // L'URL che innesca il logout (dal tasto nella
                                                                       // dashboard)
