@@ -27,30 +27,6 @@ services:
       - vault
       - mongo-express
       - mongodb
-# ----------------------------------------------------------------
-  #   1.2 NGINX-VAULT  - Porta 9443
-  # ----------------------------------------------------------------
-  nginx-vault:
-    image: nginxinc/nginx-unprivileged:alpine
-    container_name: mensa-proxy-vault
-      # --- RUNTIME SECURITY HARDENING ---
-    # 1. Impedisce che un processo guadagni nuovi privilegi (es. sudo)
-    security_opt:
-      - no-new-privileges:true
-    
-    # 2. Rimuove TUTTE le capacità Linux (Capabilities) non necessarie
-    # Il container non potrà cambiare permessi file, gestire la rete, ecc.
-    cap_drop:
-      - ALL
-    ports:
-      - "9443:9443"  # HTTPS 
-    volumes:
-      - ./nginx/nginx-vault.conf:/etc/nginx/nginx.conf:ro
-      - ./mensa.crt:/etc/nginx/certs/server.crt:ro
-      - ./mensa.key:/etc/nginx/certs/server.key:ro
-    depends_on:
-      - vault
-
 
   # --- 2. TUA APP SPRING BOOT ---
   app_kc:
@@ -157,8 +133,6 @@ services:
   vault:
     image: hashicorp/vault:1.15
     container_name: mensa-vault
-    ports:
-      - "8200:8200"
     cap_add:
       - IPC_LOCK
     environment:
