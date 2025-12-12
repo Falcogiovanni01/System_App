@@ -42,7 +42,7 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/", "/home").permitAll()
                                                 .requestMatchers("/gestione").hasRole("ADMIN")
-                                                .requestMatchers("/dashboard", "/ordini").hasAnyRole("USER", "ADMIN")
+                                                .requestMatchers("/dashboard", "/ordini").hasAnyRole("USER")
                                                 .anyRequest().authenticated())
                                 // NIST CSRF PROTECTION (Abilita protezione tramite Cookie)
                                 .csrf(csrf -> csrf
@@ -59,7 +59,6 @@ public class SecurityConfig {
                                 // =================================================================
                                 // --- FINE NUOVO CODICE ---
                                 // =================================================================
-
                                 .oauth2Login(oauth2 -> oauth2
                                                 .authorizationEndpoint(authEndpoint -> authEndpoint
                                                                 .authorizationRequestResolver(resolver))
@@ -81,7 +80,6 @@ public class SecurityConfig {
                                                                                         System.out.println(
                                                                                                         "User Info Attributes: "
                                                                                                                         + userInfoMap);
-
                                                                                         Map<String, Object> realmAccess = (Map<String, Object>) userInfoMap
                                                                                                         .get("realm_access");
                                                                                         if (realmAccess != null) {
@@ -106,7 +104,6 @@ public class SecurityConfig {
                                                                                         }
                                                                                 }
                                                                         });
-
                                                                         System.out.println("Ruoli finali assegnati: "
                                                                                         + mappedAuthorities);
                                                                         System.out.println(
@@ -122,7 +119,6 @@ public class SecurityConfig {
                                                 .invalidateHttpSession(true) // Cancella la sessione
                                                 .clearAuthentication(true) // Pulisce i dati auth
                                                 .permitAll());
-
                 return http.build();
         }
 

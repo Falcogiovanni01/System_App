@@ -12,5 +12,5 @@ accedere al seguente link:
 https://localhost:8443/home
 admin keycloack: 
 https://localhost:8443/admin/master/console/
-per accedere a vault:
+per accedere a vault: 
 https://localhost:9443/ui
