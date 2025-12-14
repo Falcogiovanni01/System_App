@@ -83,8 +83,15 @@ services:
       KC_HOSTNAME_PORT: 8443
       KC_PROXY_HEADERS: xforwarded
       KC_PROXY: edge
+      KC_CACHE_THEMES: "false"  # Disabilita cache del tema
+      KC_OPTIMIZED_HTML_CACHE: "false" # Disabilita ottimizzazione HTML
     volumes:
       - ./dati_keycloak:/opt/keycloak/data/
+      - ./themes:/opt/keycloak/themes:ro  
+      - ./password.txt:/opt/keycloak/data/password-blacklists/password.txt:ro
+    #  - ./password-blacklist.txt:/opt/keycloak/data/password-blacklist.txt:ro
+    
+    
 
   # --- 4. MONGODB ---
   mongodb:
