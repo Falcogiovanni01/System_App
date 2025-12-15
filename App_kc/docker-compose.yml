@@ -19,13 +19,13 @@ services:
       - "80:8080" # la modalità nginx-unprivileged usa 8080 invece di 80)
     volumes:
       - ./nginx/nginx-user.conf:/etc/nginx/nginx.conf:ro
-      - ./mensa.crt:/etc/nginx/certs/server.crt:ro
-      - ./mensa.key:/etc/nginx/certs/server.key:ro
+      # - ./mensa.crt:/etc/nginx/certs/server.crt:ro
+      # - ./mensa.key:/etc/nginx/certs/server.key:ro
+      - ./certs:/etc/nginx/certs:ro
     depends_on:
       - keycloak
       - app_kc
       - vault
-      - mongo-express
       - mongodb
 
   # --- 2. TUA APP SPRING BOOT ---
@@ -49,6 +49,14 @@ services:
       MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
       KEYCLOACK_PASSWORD: ${KEYCLOACK_PASSWORD}             
       KEYCLOACK_CLIENT_SECRET: ${KEYCLOACK_CLIENT_SECRET}
+      TERM: xterm-256color
+      # --- AGGIUNTO: CONFIGURAZIONE LOGGING DOCKER (AU-4 / AU-6) ---
+    logging:
+      driver: "json-file"  # Driver di log standard
+      options:
+        max-size: "100m"   # AU-4: Limite dimensione del file di log gestito da Docker
+        max-file: "5"      # AU-4: Numero massimo di file di backup prima di sovrascrivere
+        
     # --- RUNTIME SECURITY HARDENING ---
     # --- HARDENING FINALE ---
     read_only: true  # <--- Questo è il Read-Only Filesystem ( PER RUNTIMR CONFIGURATION)
@@ -121,19 +129,24 @@ services:
     ]
 
   # --- 5. MONGO EXPRESS ---
-  mongo-express:
-    image: mongo-express
-    container_name: mensa-mongo-admin
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://root:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    ports:
-      - "8082:8081"
-    depends_on:
-      - mongodb
+  # Il database non espone porte all'esterno per sicurezza.
+    # Solo il container 'app_kc' può accedere al DB tramite rete interna.
+    # L'amministrazione del DB avviene esclusivamente via Shell (CLI).
+  # mongo-express:
+  #   image: mongo-express
+  #   container_name: mensa-mongo-admin
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/
+  #     ME_CONFIG_BASICAUTH_USERNAME: admin
+  #     ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_ROOT_PASSWORD}
+  #     ME_CONFIG_SITE_BASEURL: /mongo-admin/
+  #   # ports:
+  #   #   - "8082:8081"
+  #   depends_on:
+  #     - mongodb:
+  #       condition: service_healthy
 
 
 # --- 6. HASHICORP VAULT (PROD MODE) ---
