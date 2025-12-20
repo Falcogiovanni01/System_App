@@ -50,6 +50,11 @@ services:
       KEYCLOACK_PASSWORD: ${KEYCLOACK_PASSWORD}             
       KEYCLOACK_CLIENT_SECRET: ${KEYCLOACK_CLIENT_SECRET}
       TERM: xterm-256color
+      LOGGING_FILE_NAME: /app/logs/SpringBootAppLogs.log
+    volumes:
+      - ./logs:/app/logs
+
+      
       # --- AGGIUNTO: CONFIGURAZIONE LOGGING DOCKER (AU-4 / AU-6) ---
     logging:
       driver: "json-file"  # Driver di log standard
@@ -61,7 +66,8 @@ services:
     # --- HARDENING FINALE ---
     read_only: true  # <--- Questo è il Read-Only Filesystem ( PER RUNTIMR CONFIGURATION)
     tmpfs:
-      - /tmp         # <---scrivi in una cartella in RAM, temporanea, se scrivi file sul disco si blocca. 
+      - /tmp   
+      - /run      # <---scrivi in una cartella in RAM, temporanea, se scrivi file sul disco si blocca. 
     # 1. Impedisce che un processo guadagni nuovi privilegi (es. sudo)
     security_opt:
       - no-new-privileges:true
